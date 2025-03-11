@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2000, 2025, Oracle and/or its affiliates.
  *
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * http://oss.oracle.com/licenses/upl.
@@ -75,6 +75,16 @@ class COH_EXPORT OperationalContext
         * @since Coherence 12.1.2
         */
         virtual Map::View getSerializerMap() const = 0;
+
+        /**
+        * Return a Map of socket provider factories.
+        *
+        * @return a Map of SocketProviderFactory instances keyed by socket
+        *         provider name
+        *
+        * @since Coherence 15.1.1
+        */
+        virtual Map::View getSocketProviderMap() const = 0;
 
         /**
         * Return a Map of address provider factories.
