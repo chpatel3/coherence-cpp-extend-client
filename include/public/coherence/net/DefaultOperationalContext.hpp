@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2020, Oracle and/or its affiliates.
+ * Copyright (c) 2000, 2025, Oracle and/or its affiliates.
  *
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * http://oss.oracle.com/licenses/upl.
@@ -109,6 +109,11 @@ class COH_EXPORT DefaultOperationalContext
         /**
         * {@inheritDoc}
         */
+        virtual Map::View getSocketProviderMap() const;
+
+        /**
+        * {@inheritDoc}
+        */
         virtual Map::View getAddressProviderMap() const;
 
         /**
@@ -180,6 +185,14 @@ class COH_EXPORT DefaultOperationalContext
         * keys and values.
         */
         FinalView<Map> f_vSerializerMap;
+
+        /**
+        * The configured SocketProvider map.
+        *
+        * See OperationalContext::getSocketProviderMap() for a description of the
+        * keys and values.
+        */
+        FinalView<Map> f_vSocketProviderMap;
 
         /**
         * The configured AddressProvider map.

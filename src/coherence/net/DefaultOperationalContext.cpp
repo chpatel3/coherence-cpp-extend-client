@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2021, Oracle and/or its affiliates.
+ * Copyright (c) 2000, 2025, Oracle and/or its affiliates.
  *
  * Licensed under the Universal Permissive License v 1.0 as shown at
  * http://oss.oracle.com/licenses/upl.
@@ -11,6 +11,8 @@
 #include "coherence/io/WrapperStreamFactory.hpp"
 #include "coherence/net/ConfigurableAddressProviderFactory.hpp"
 #include "coherence/net/InetAddress.hpp"
+#include "coherence/net/SocketProviderFactory.hpp"
+#include "coherence/net/SslSocketProviderFactory.hpp"
 #include "coherence/security/DefaultIdentityAsserter.hpp"
 #include "coherence/security/DefaultIdentityTransformer.hpp"
 #include "coherence/util/Iterator.hpp"
@@ -34,6 +36,7 @@ using coherence::io::WrapperStreamFactory;
 using coherence::io::pof::SystemPofContextSerializerFactory;
 using coherence::native::NativePID;
 using coherence::native::NativeUser;
+using coherence::net::SslSocketProvider;
 using coherence::run::xml::SimpleElement;
 using coherence::run::xml::SimpleParser;
 using coherence::run::xml::XmlHelper;
@@ -52,6 +55,7 @@ DefaultOperationalContext::DefaultOperationalContext(
         : f_vsEdition(self()),
           f_vFilterMap(self()),
           f_vSerializerMap(self()),
+          f_vSocketProviderMap(self()),
           f_vAddressProviderMap(self()),
           f_vMemberLocal(self()),
           f_vAsserter(self()),
@@ -257,6 +261,25 @@ DefaultOperationalContext::DefaultOperationalContext(
         }
     initialize(f_vAddressProviderMap, hAddressProviderMap);
 
+    // SocketProviders
+    Map::Handle hSocketProviderMap  = SafeHashMap::create();
+    XmlElement::View  vXmlSocketProviders =
+                vXmlCoherence->getSafeElement("cluster-config/socket-providers");
+    for (Iterator::Handle hIter = vXmlSocketProviders->getElements("socket-provider");
+            hIter->hasNext(); )
+        {
+        XmlElement::View  vXmlSocketProvider = cast<XmlElement::View>(hIter->next());
+        String::View      vsSocketProvider   = vXmlSocketProvider->getAttribute("id")->getString();
+    
+        COH_LOG("Declaring socket provider \"" << vsSocketProvider << "\" = "
+                    << vXmlSocketProvider, 7);
+ 
+        SslSocketProviderFactory::Handle hSSPFactory = SslSocketProviderFactory::create();
+        hSSPFactory->setConfig(vXmlSocketProvider);
+        hSocketProviderMap->put(vsSocketProvider, hSSPFactory);
+        }
+    initialize(f_vSocketProviderMap, hSocketProviderMap);
+
     // IdentityAsserter and IdentityTransformer
     IdentityAsserter::Handle    hAsserter    = NULL;
     IdentityTransformer::Handle hTransformer = NULL;
@@ -367,6 +390,11 @@ Map::View DefaultOperationalContext::getFilterMap() const
 Map::View DefaultOperationalContext::getSerializerMap() const
     {
     return f_vSerializerMap;
+    }
+
+Map::View DefaultOperationalContext::getSocketProviderMap() const
+    {
+    return f_vSocketProviderMap;
     }
 
 Map::View DefaultOperationalContext::getAddressProviderMap() const

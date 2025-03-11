@@ -339,9 +339,20 @@ void TcpInitiator::configure(XmlElement::View vXml)
         XmlElement::View vXmlCat;
         XmlElement::View vXmlSub;
         XmlElement::View vXmlVal;
+        XmlElement::View vXmlSocketProvider;
 
         // <tcp-initiator>
         vXmlCat = vXml->getSafeElement("tcp-initiator");
+
+        // <socket-provider>
+        vXmlSocketProvider = vXmlCat->getElement("socket-provider");
+        String::View vsSocketProvider = vXmlSocketProvider == NULL ? "" : vXmlSocketProvider->getString();
+        if (!vsSocketProvider->isEmpty())
+            {
+            COH_LOG("Socket Provider ID  : " << vsSocketProvider, 5);
+            Object::Holder hSocketProvider = getOperationalContext()->getSocketProviderMap()->get(vsSocketProvider);
+            COH_LOG("Socket Provider Obj : " << hSocketProvider, 5);
+            }
 
         // <local-address>
         vXmlSub = vXmlCat->getSafeElement("local-address");
